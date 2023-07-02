@@ -4,6 +4,7 @@ import google.generativeai as palm
 import re
 import requests
 from constants import SESSION_HEADERS
+# from utils import urlify_string
 import time
 import urllib.parse
 import streamlit as st
@@ -11,7 +12,6 @@ import streamlit as st
 dotenv.load_dotenv()
 
 class Recommend_movies:
-
     def __init__(self) -> None:
         self.model = palm
         self.model.configure(api_key=os.getenv("PALM_API_KEY"))
@@ -41,27 +41,25 @@ class Recommend_movies:
         url_encoded = urllib.parse.quote(string)
         return url_encoded
     
-    def extract_text(self,string):
-        pattern = r"\*\*(.*?)\*\*"
-        matches = re.findall(pattern, string)
-        return matches
-    
     def generate(self,movie_name = str):
 
         result = []
         
-        prompt = f"""
-        My Favourite movie is {movie_name} ? What are 5 movies i should watch next ?
-        """
+        prompt = f"""input: Th Dark Knight 
+            output: Batman Begins
+            The Prestige
+            Se7en
+            Fight Club
+            The Shawshank Redemption
+            input: {movie_name}
+            output:"""
 
         response = self.model.generate_text(
             **self.defaults,
             prompt=prompt
         )
-        if "*" in response.result:
-            recommendations = self.extract_text(response.result)
-        else : 
-            recommendations = response.result.split("\n")
+        
+        recommendations = response.result.split("\n")
         time.sleep(0.1)
         for i in recommendations:
             movie = self.urlify_string(i)
@@ -75,9 +73,7 @@ class Recommend_movies:
 
 
 st.title("Recommendation System Using Palm")
-
 text_box = st.text_input("Your movie goes here 🎥")
-
 col1, col2 = st.columns(2)
 
 r_m = Recommend_movies()
